@@ -1,0 +1,7 @@
+version: "3.0"
+services:
+  myCart:
+    image: library/postgres:latest
+    ports:
+      - "5432:5432"
+

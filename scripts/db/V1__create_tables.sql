@@ -1,0 +1,18 @@
+CREATE TABLE Cart (
+  id  SERIAL PRIMARY KEY
+);
+
+
+CREATE TABLE StoreItem (
+  id SERIAL PRIMARY KEY,
+  price NUMERIC(10,2),
+  name TEXT
+);
+
+CREATE TABLE Item (
+  id SERIAL PRIMARY KEY,
+  cartId INT NOT NULl REFERENCES Cart(id) ON DELETE CASCADE,
+  storeId INT NOT NULL UNIQUE REFERENCES StoreItem(id),
+  count SMALLINT NOT NULL CHECK (count >= 0)
+);
+
