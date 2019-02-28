@@ -26,9 +26,9 @@ export class CartResolver {
     }
 
     @Mutation(returns => Cart)
-    async itemQuantityUpdate(@Ctx() context: Context, @Arg("cartId") cartId: number, @Arg("itemId") itemId: number, @Arg("delta") delta: number) {
+    async itemQuantityUpdate(@Ctx() context: Context, @Arg("cartId") cartId: number, @Arg("productId") productId: number, @Arg("delta") delta: number) {
         const cartEntity = await context.cartDbClient.doTransaction(async () => {
-            const {cart, storeItem}  = await Promise.all([context.cartDbClient.findCart(cartId), context.cartDbClient.findStoreItem(itemId)])
+            const {cart, storeItem}  = await Promise.all([context.cartDbClient.findCart(cartId), context.cartDbClient.findStoreItem(productId)])
                 .then(result => ({cart: result[0], storeItem: result[1]}));
 
             const itemInCartIndex = cart.items.findIndex(item => item.storeItem.id === storeItem.id);

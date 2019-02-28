@@ -124,7 +124,7 @@ const updateQuantity = async (app: Application, storeItemId: number, delta: numb
     return await supertest(app)
         .post(GRAPHQL_PATH)
         .send({
-            query: `mutation {itemQuantityUpdate(delta:${delta}, itemId:${storeItemId}, cartId:${cartId}){items{id name price count total} total}}`
+            query: `mutation {itemQuantityUpdate(delta:${delta}, productId:${storeItemId}, cartId:${cartId}){items{id name price count total} total}}`
         })
         .set('Accept', 'application/json')
         .expect(200)
