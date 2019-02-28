@@ -3,7 +3,20 @@ import {CartEntity} from '../entity/CartEntity';
 import {StoreItemEntity} from '../entity/StoreItemEntity';
 import {ItemEntity} from '../entity/ItemEntity';
 
-export class CartDbClient extends DatabaseClient {
+
+export interface ICartDbClient {
+    findCart: (id: number) => Promise<CartEntity>;
+    createCart: () => Promise<CartEntity>;
+    saveCart: (cartEntity: CartEntity) => Promise<CartEntity>;
+    findStoreItem: (id: number) => Promise<StoreItemEntity>;
+    findAllStoreItem: () => Promise<StoreItemEntity[]>;
+    createItem: () => Promise<ItemEntity>;
+    removeItem: (itemEntity: ItemEntity) => Promise<void>;
+
+    doTransaction: <T>(body: () => Promise<T>) => Promise<T>;
+}
+
+export class CartDbClient extends DatabaseClient implements ICartDbClient {
     findCart = async (id: number): Promise<CartEntity> => {
         return this.getRepository(CartEntity).findOne(id)
             .then(result => {
@@ -40,6 +53,7 @@ export class CartDbClient extends DatabaseClient {
     };
 
     removeItem = async (itemEntity: ItemEntity): Promise<void> => {
-        return this.getRepository(ItemEntity).delete(itemEntity.id).then(() => {});
-    }
+        return this.getRepository(ItemEntity).delete(itemEntity.id).then(() => {
+        });
+    };
 }
