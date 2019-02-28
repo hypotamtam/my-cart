@@ -1,44 +1,34 @@
 import {Cart} from './dto/Cart';
-import {CartEntity}  from './db/entity/CartEntity'
 import {Arg, Ctx, Mutation, Query, Resolver} from 'type-graphql';
 import {Context} from './GraphqlServer';
-import {CartDbClient} from './db/client/CartDbClient';
-import {ConnectionProvider} from './db/client/ConnectionProvider';
-import {ItemEntity} from './db/entity/ItemEntity';
-import {StoreItem} from './dto/StoreItem';
+import {Product} from './dto/Product';
 
 @Resolver(of => Cart)
 export class CartResolver {
 
     @Query(returns => Cart)
-    async cartQuery(@Ctx() context: Context, @Arg("cartId", {defaultValue: null}) cartId?: number): Promise<Cart> {
-        const dbClient = new CartDbClient(await ConnectionProvider.getCartConnection());
-
+    async cart(@Ctx() context: Context, @Arg("cartId", {defaultValue: null}) cartId?: number): Promise<Cart> {
         if (cartId) {
-            const storedCart = await dbClient.findCart(cartId);
+            const storedCart = await context.cartDbClient.findCart(cartId);
             return Cart.from(storedCart);
         } else {
-            const newCart = await dbClient.createCart();
+            const newCart = await context.cartDbClient.createCart();
             newCart.items = [];
-            await dbClient.saveCart(newCart);
+            await context.cartDbClient.saveCart(newCart);
             return Cart.from(newCart);
         }
     }
 
-    @Query(returns => [StoreItem])
-    async catalogueQuery(@Ctx() context: Context) {
-        const dbClient = new CartDbClient(await ConnectionProvider.getCartConnection());
-
-        const storeEntities = await dbClient.findAllStoreItem();
-        return storeEntities.map(storeEntity => StoreItem.from(storeEntity));
+    @Query(returns => [Product])
+    async products(@Ctx() context: Context) {
+        const storeEntities = await context.cartDbClient.findAllStoreItem();
+        return storeEntities.map(storeEntity => Product.from(storeEntity));
     }
 
     @Mutation(returns => Cart)
     async itemQuantityUpdate(@Ctx() context: Context, @Arg("cartId") cartId: number, @Arg("itemId") itemId: number, @Arg("delta") delta: number) {
-        const dbClient = new CartDbClient(await ConnectionProvider.getCartConnection());
-
-        const cartEntity = await dbClient.doTransaction(async () => {
-            const {cart, storeItem}  = await Promise.all([dbClient.findCart(cartId), dbClient.findStoreItem(itemId)])
+        const cartEntity = await context.cartDbClient.doTransaction(async () => {
+            const {cart, storeItem}  = await Promise.all([context.cartDbClient.findCart(cartId), context.cartDbClient.findStoreItem(itemId)])
                 .then(result => ({cart: result[0], storeItem: result[1]}));
 
             const itemInCartIndex = cart.items.findIndex(item => item.storeItem.id === storeItem.id);
@@ -47,16 +37,16 @@ export class CartResolver {
                 itemInCart.count += delta;
                 if (itemInCart.count <= 0) {
                     cart.items.splice(itemInCartIndex, 1);
-                    await dbClient.removeItem(itemInCart);
+                    await context.cartDbClient.removeItem(itemInCart);
                 }
             } else if (delta > 0) {
-                const item = await dbClient.createItem();
+                const item = await context.cartDbClient.createItem();
                 item.cart = cart;
                 item.count = delta;
                 item.storeItem = storeItem;
                 cart.items.push(item);
             }
-            return await dbClient.saveCart(cart);
+            return await context.cartDbClient.saveCart(cart);
         });
 
         return Cart.from(cartEntity);

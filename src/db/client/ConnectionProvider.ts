@@ -6,11 +6,8 @@ import {StoreItemEntity} from '../entity/StoreItemEntity';
 
 export class ConnectionProvider {
 
-    private static cartConnection: Connection;
-
     public static getCartConnection = async (): Promise<Connection> => {
-        ConnectionProvider.cartConnection = ConnectionProvider.cartConnection || await connectToCartDb();
-        return ConnectionProvider.cartConnection;
+        return connect('cart', Config.cartDb,  [CartEntity, ItemEntity, StoreItemEntity]);
     };
 
 }
@@ -29,9 +26,6 @@ const connect = (name: string, configuration: DatabaseConfiguration, entities: F
     ssl: configuration.ssl,
     logger: logger()
 });
-
-const connectToCartDb = (): Promise<Connection> => connect('cart', Config.cartDb,  [CartEntity, ItemEntity, StoreItemEntity]);
-
 
 const logger = (): Logger => ({
     log(level: 'log' | 'info' | 'warn', message: any, queryRunner?: QueryRunner): any {

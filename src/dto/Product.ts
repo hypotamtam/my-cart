@@ -3,7 +3,7 @@ import {PriceGraphqlScalar} from './PriceGraphqlScalar';
 import {StoreItemEntity} from '../db/entity/StoreItemEntity';
 
 @ObjectType()
-export class StoreItem {
+export class Product {
     @Field()
     id: number;
 
@@ -13,8 +13,8 @@ export class StoreItem {
     @Field(() => PriceGraphqlScalar)
     price: number;
 
-    static from = (storeEntity: StoreItemEntity): StoreItem =>  {
-        const storeItem = new StoreItem();
+    static from = (storeEntity: StoreItemEntity): Product =>  {
+        const storeItem = new Product();
 
         storeItem.id = storeEntity.id;
         storeItem.name = storeEntity.name;
