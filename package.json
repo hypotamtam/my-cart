@@ -8,7 +8,7 @@
     "watch:build": "tsc --watch",
     "watch:server": "nodemon './dist/src/start.js' --watch './dist'",
     "startService": "node dist/src/start.js",
-    "start": "npm-run-all build test startService",
+    "start": "npm-run-all build test flyway startService",
     "flyway": "flyway -user=postgres -password= -url=jdbc:postgresql://localhost:5432/ -locations=filesystem:scripts/db migrate",
     "startdev": "npm-run-all build --parallel watch:build watch:server",
     "test": "gulp test",
